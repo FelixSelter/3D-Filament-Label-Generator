@@ -1,0 +1,72 @@
+body {
+  --label-width: 22mm;
+  --label-height: 12mm;
+  --label-border-radius: 2mm;
+  --logo-brand-font-size: 6pt;
+  --logo-filament-font-size: 5pt;
+  --label-logo-size: 6mm;
+}
+.brand-list-item,
+.type-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+.type-list-item::before {
+  content: "•";
+  font-size: 20px;
+  line-height: 1;
+}
+.brand-logo-small {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.logo-text {
+  font-weight: bold;
+  align-self: center;
+  margin-right: 20px;
+}
+.label-container {
+  border: 0.5mm dashed black;
+  border-radius: var(--label-border-radius, 2mm);
+  width: var(--label-width, 22mm);
+  height: var(--label-height, 12mm);
+  display: grid;
+  grid-template-columns: 1fr var(--label-logo-size, 8mm);
+  padding: 0.5mm;
+  background: white;
+}
+#label-preview {
+  width: 80vw;
+  height: 30vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.label-brand {
+  font-size: var(--logo-brand-font-size, 6pt);
+  font-weight: bold;
+}
+.label-filamenttype {
+  font-size: var(--logo-filament-font-size, 5pt);
+}
+.label-filamentname {
+  font-size: var(--logo-filament-font-size, 5pt);
+}
+.label-logo {
+  width: var(--label-logo-size, 8mm);
+  height: var(--label-logo-size, 8mm);
+  object-fit: contain;
+}
+.label-text {
+  display: flex;
+  flex-direction: column;
+}
+.label-spacer {
+  flex-grow: 1;
+}

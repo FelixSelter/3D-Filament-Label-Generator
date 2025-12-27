@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Filament Label Generator</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <div class="container py-4">
+      <header class="text-center mb-4">
+        <h1>3D Filament Label Generator</h1>
+        <p class="text-muted">
+          Create custom labels for your 3D printing filament spools
+        </p>
+        <a
+          href="https://github.com/FelixSelter/3D-Filament-Label-Generator"
+          target="_blank"
+          class="btn btn-sm btn-outline-secondary"
+          >View on GitHub</a
+        >
+      </header>
+
+      <!-- Section 1: Data Management -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Brand & Filament Type Management</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <h6>Brands</h6>
+              <p class="small text-muted">
+                Add brands with logos for your filament labels
+              </p>
+              <div class="mb-2">
+                <input
+                  type="text"
+                  id="brandName"
+                  class="form-control mb-2"
+                  placeholder="Brand name"
+                />
+                <div class="input-group">
+                  <span class="logo-text">Logo:</span>
+                  <input
+                    type="file"
+                    id="brandLogo"
+                    class="form-control"
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+              <button class="btn btn-primary mb-3" onclick="addBrand()">
+                Add Brand
+              </button>
+              <div id="brandList"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <h6>Filament Types</h6>
+              <p class="small text-muted">
+                Manage available filament material types
+              </p>
+              <div class="mb-2">
+                <input
+                  type="text"
+                  id="typeName"
+                  class="form-control mb-2"
+                  placeholder="Type name"
+                />
+              </div>
+              <button class="btn btn-primary mb-3" onclick="addType()">
+                Add Type
+              </button>
+              <div id="typeList"></div>
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="exportData()">
+              Export Data (JSON)
+            </button>
+            <button
+              class="btn btn-info"
+              onclick="document.getElementById('importFile').click()"
+            >
+              Import Data (JSON)
+            </button>
+            <input
+              type="file"
+              id="importFile"
+              accept=".json"
+              style="display: none"
+              onchange="importData(event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Global Settings -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Global Label Settings</h5>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">These settings apply to all labels</p>
+          <div class="row">
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Width (mm)</label>
+              <input
+                type="number"
+                id="labelWidth"
+                class="form-control"
+                value="22"
+                min="10"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Height (mm)</label>
+              <input
+                type="number"
+                id="labelHeight"
+                class="form-control"
+                value="12"
+                min="10"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Corner Radius (mm)</label>
+              <input
+                type="number"
+                id="cornerRadius"
+                class="form-control"
+                value="2"
+                min="0"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Logo Size (mm)</label>
+              <input
+                type="number"
+                id="logoSize"
+                class="form-control"
+                value="6"
+                min="2"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Brand Font Size (pt)</label>
+              <input
+                type="number"
+                id="brandFontSize"
+                class="form-control"
+                value="6"
+                min="4"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Filament Font Size (pt)</label>
+              <input
+                type="number"
+                id="filamentFontSize"
+                class="form-control"
+                value="5"
+                min="4"
+                onchange="updateCSSVariables()"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Label Creator -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Label Designer</h5>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">Preview and create individual labels</p>
+          <div id="label-preview">
+            <div class="label-container">
+              <div class="label-text">
+                <div class="label-brand">Brand Name</div>
+                <div class="label-spacer"></div>
+                <div class="label-filamenttype">Type</div>
+                <div class="label-filamentname">Filament Name</div>
+              </div>
+            </div>
+          </div>
+          <div class="row align-items-end">
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Brand</label>
+              <select
+                id="selectBrand"
+                class="form-select"
+                onchange="updatePreview()"
+              >
+                <option value="">Select brand...</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Filament Type</label>
+              <select
+                id="selectType"
+                class="form-select"
+                onchange="updatePreview()"
+              >
+                <option value="">Select type...</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Filament Name</label>
+              <input
+                type="text"
+                id="filamentName"
+                class="form-control"
+                placeholder="e.g., Galaxy Black"
+                oninput="updatePreview()"
+              />
+            </div>
+            <div class="col-md-2 mb-2">
+              <button class="btn btn-primary w-100" onclick="addLabel()">
+                Add Label
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Created Labels -->
+      <div class="card mb-4">
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">Created Labels</h5>
+          <button class="btn btn-success" onclick="exportPDF()">
+            Export to PDF
+          </button>
+        </div>
+        <div class="card-body">
+          <p class="small text-muted">
+            Your generated labels ready for printing
+          </p>
+          <div id="createdLabels" class="row"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
