@@ -53,8 +53,6 @@ export default function CreatedLabels() {
 
     const scale = Math.min(labelWidth, labelHeight) / 12;
 
-    const logoPadding = brandFontSize > 0 ? 0.7 * scale : 0;
-
     let currentLabel = 0;
     let pageCount = 0;
 
