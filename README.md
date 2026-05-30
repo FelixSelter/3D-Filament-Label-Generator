@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# 3D Filament Label Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Do note that this code was mainly created by AI and I did only fix what was broken and instructed the AI a bit. The code is probably shit but for such a small project this was a quick and working solution.
 
-Currently, two official plugins are available:
+This project was created to solve a very practical problem: keeping track of a large and growing collection of 3D printing filaments.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+I print a lot of **filament swatches** to show colors and material properties. Friends can then look through these swatches and choose a color they like for their prints. With many different **brands**, **materials**, and **color names**, it quickly becomes impossible to remember which filament is which.
 
-## React Compiler
+This tool generates **uniform, print-accurate labels** that can be attached to filament swatches, making the collection easy to understand and use. I use this model for my swatches: https://makerworld.com/en/models/639266-bambu-lab-filament-swatch-with-12x22r2-label?from=search#profileId-565048
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Manage filament **brands** (with optional logos)
+- Manage filament **material types** (PLA, PETG, ABS, etc.)
+- Create individual labels with:
+  - Brand name
+  - Material type
+  - Filament name
+  - Optional brand logo
+- Fully configurable label dimensions:
+  - Width and height (mm)
+  - Corner radius
+  - Font sizes
+  - Logo size
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Workflow
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. Add filament brands (optionally with logos)
+2. Add filament material types
+3. Configure global label dimensions and typography
+4. Create labels for each filament swatch
+5. Export a PDF
+6. Print, laminate, and attach labels to swatches
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Contributing
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Please consider sharing brands that are not added by default for others
+
+---
+
+## License
+
+Personal project. Use, modify, and adapt as needed.
+All brand images are property of the corresponding company
