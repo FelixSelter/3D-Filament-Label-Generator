@@ -1,0 +1,51 @@
+.labelContainer {
+  border: 0.5mm dashed black;
+  border-radius: var(--label-border-radius, 2mm);
+  width: var(--label-width, 22mm);
+  height: var(--label-height, 12mm);
+  display: grid;
+  grid-template-columns: 1fr var(--label-logo-size, 8mm);
+  padding: 0.5mm;
+  background: white;
+}
+
+.labelBrand {
+  font-size: var(--logo-brand-font-size, 6pt);
+  font-weight: bold;
+}
+.labelFilamenttype {
+  font-size: var(--logo-filament-font-size, 5pt);
+}
+.labelFilamentname {
+  font-size: var(--logo-filament-font-size, 5pt);
+}
+.labelLogo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+
+  position: absolute;
+  --scale: min(var(--label-width, 22mm), var(--label-height, 12mm)) / 12;
+  right: calc(0.3 * var(--scale));
+  top: calc(0.3 * var(--scale));
+}
+
+.labelLogo.background {
+  background-color: var(--label-bg-color, white);
+  padding: calc(0.7 * var(--scale));
+  border-radius: calc(0.7 * var(--scale));
+}
+
+.labelText {
+  display: flex;
+  flex-direction: column;
+}
+.labelSpacer {
+  flex-grow: 1;
+}
+
+.logoContainer {
+  width: var(--label-logo-size, 8mm);
+  height: var(--label-logo-size, 8mm);
+  position: relative;
+}
