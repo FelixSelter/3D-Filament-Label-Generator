@@ -35,7 +35,6 @@ export default function CreatedLabels() {
       format: "a4",
     });
 
-    // Single border that grows outward
     const borderWidth = 0.3;
     const spacing = 3;
     const pageWidth = 210;
@@ -45,9 +44,16 @@ export default function CreatedLabels() {
     const cols = Math.floor(
       (pageWidth - margin * 2 + spacing) / (labelWidth + spacing),
     );
+
     const rows = Math.floor(
       (pageHeight - margin * 2 + spacing) / (labelHeight + spacing),
     );
+
+    const logoBoxSize = labelLogoSize;
+
+    const scale = Math.min(labelWidth, labelHeight) / 12;
+
+    const logoPadding = brandFontSize > 0 ? 0.7 * scale : 0;
 
     let currentLabel = 0;
     let pageCount = 0;
@@ -63,12 +69,11 @@ export default function CreatedLabels() {
 
           const label = labels[currentLabel];
           if (!label) {
-            console.error("Label data missing for index", currentLabel);
             currentLabel++;
             continue;
           }
 
-          // ---- Border (expanded outward) ----
+          // ---- Border ----
           doc.setDrawColor(0);
           doc.setLineWidth(borderWidth);
           doc.roundedRect(
@@ -81,64 +86,79 @@ export default function CreatedLabels() {
             "S",
           );
 
-          // ---- Brand ----
+          // ---- Text ----
           doc.setFontSize(brandFontSize);
-          doc.setFont("sans-serif", "bold");
-          const brandTextHeight = brandFontSize * 0.3528;
+          doc.setFont("helvetica", "bold");
 
+          const brandTextHeight = brandFontSize * 0.3528;
           doc.text(label.brand.name, x + 1, y + 1 + brandTextHeight);
 
-          // ---- Filament text ----
           doc.setFontSize(filamentFontSize);
-          doc.setFont("sans-serif", "normal");
+          doc.setFont("helvetica", "normal");
 
           const filamentTextHeight = filamentFontSize * 0.3528;
-          const textBottomMargin = 1;
-          const lineSpacing = 0.5;
+          const bottomMargin = 1;
 
           doc.text(
             label.type,
             x + 1,
-            y +
-              labelHeight -
-              textBottomMargin -
-              filamentTextHeight -
-              lineSpacing,
+            y + labelHeight - bottomMargin - filamentTextHeight - 0.5,
           );
 
-          doc.text(label.name, x + 1, y + labelHeight - textBottomMargin);
+          doc.text(label.name, x + 1, y + labelHeight - bottomMargin);
 
-          // ---- Logo ----
+          // ---- Logo area (RIGHT COLUMN like CSS grid) ----
           if (label.brand.logo) {
-            try {
-              const img = new Image();
-              img.src = label.brand.logo;
+            const labelPadding = 0.5; // matches CSS: padding: 0.5mm on .labelContainer
 
-              const imgW = img.width;
-              const imgH = img.height;
+            const logoContainerX = x + labelWidth - logoBoxSize - labelPadding;
+            const logoContainerY = y + labelPadding;
 
-              if (imgW > 0 && imgH > 0) {
-                const aspect = imgW / imgH;
+            const hasBackground =
+              label.brand.backgroundColor &&
+              label.brand.backgroundColor.toLowerCase() !== "white";
 
-                let drawW = labelLogoSize;
-                let drawH = labelLogoSize;
+            const padding = brandFontSize > 0 ? 0.7 * scale : 0;
+            const offset = 0.3 * scale;
 
-                if (aspect > 1) {
-                  // wide image
-                  drawH = labelLogoSize / aspect;
-                } else {
-                  // tall image
-                  drawW = labelLogoSize * aspect;
-                }
+            const img = new Image();
+            img.src = label.brand.logo;
+            const aspect = img.width && img.height ? img.width / img.height : 1;
 
-                const imgX = x + labelWidth - drawW - 0.5;
-                const imgY = y + 0.5 + (labelLogoSize - drawH) / 2;
+            const innerSize = logoBoxSize - (hasBackground ? padding * 2 : 0);
 
-                doc.addImage(label.brand.logo, "PNG", imgX, imgY, drawW, drawH);
-              }
-            } catch (err) {
-              console.error("Error adding logo:", err);
+            let drawW = innerSize;
+            let drawH = innerSize;
+            if (aspect > 1) {
+              drawH = innerSize / aspect;
+            } else {
+              drawW = innerSize * aspect;
             }
+
+            // Same offset applied in both cases — CSS uses it unconditionally
+            const imgX =
+              logoContainerX +
+              logoBoxSize -
+              offset -
+              drawW -
+              (hasBackground ? padding : 0);
+            const imgY =
+              logoContainerY + offset + (hasBackground ? padding : 0);
+
+            if (hasBackground) {
+              doc.setFillColor(label.brand.backgroundColor);
+              doc.roundedRect(
+                imgX - padding,
+                imgY - padding,
+                drawW + padding * 2,
+                drawH + padding * 2,
+                padding,
+                padding,
+                "F",
+              );
+            }
+
+            doc.addImage(label.brand.logo, "PNG", imgX, imgY, drawW, drawH);
           }
 
           currentLabel++;
