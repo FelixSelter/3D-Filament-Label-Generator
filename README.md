@@ -24,6 +24,9 @@ This tool generates **uniform, print-accurate labels** that can be attached to f
   - Corner radius
   - Font sizes
   - Logo size
+- Export labels as:
+  - Individual, exact-size PDF or transparent PNG files
+  - Printable A4 PDF or transparent PNG sheets
 
 ---
 
@@ -33,7 +36,7 @@ This tool generates **uniform, print-accurate labels** that can be attached to f
 2. Add filament material types
 3. Configure global label dimensions and typography
 4. Create labels for each filament swatch
-5. Export a PDF
+5. Choose an individual-label or printable-sheet export in PDF or PNG format
 6. Print, laminate, and attach labels to swatches
 
 ---
