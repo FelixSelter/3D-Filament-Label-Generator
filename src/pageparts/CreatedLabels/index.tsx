@@ -3,8 +3,37 @@ import { AppContext } from "../../AppContextWrapper";
 import Label from "./LabelListElem";
 import { jsPDF } from "jspdf";
 import { useCallback } from "react";
-import { showUserError } from "../../helper";
+import {
+  getConstrainedLogoSize,
+  getLogoDimensions,
+  loadImageAspectRatio,
+  showUserError,
+} from "../../helper";
 import { BAMBU_LABELS } from "./bambulabels";
+
+function fitTextToWidth(doc: jsPDF, text: string, maxWidth: number) {
+  if (maxWidth <= 0) return "";
+  if (doc.getTextWidth(text) <= maxWidth) return text;
+
+  const ellipsis = "...";
+  if (doc.getTextWidth(ellipsis) > maxWidth) return "";
+
+  let low = 0;
+  let high = text.length;
+
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    const candidate = `${text.slice(0, middle).trimEnd()}${ellipsis}`;
+
+    if (doc.getTextWidth(candidate) <= maxWidth) {
+      low = middle;
+    } else {
+      high = middle - 1;
+    }
+  }
+
+  return `${text.slice(0, low).trimEnd()}${ellipsis}`;
+}
 
 export default function CreatedLabels() {
   const {
@@ -24,7 +53,7 @@ export default function CreatedLabels() {
     labelConfig: state.appState.labelConfig,
   }));
 
-  const exportPDF = useCallback(() => {
+  const exportPDF = useCallback(async () => {
     if (labels.length === 0) {
       showUserError("Please create some labels first");
       return;
@@ -49,7 +78,21 @@ export default function CreatedLabels() {
       (pageHeight - margin * 2 + spacing) / (labelHeight + spacing),
     );
 
-    const logoBoxSize = labelLogoSize;
+    const logoSources = [
+      ...new Set(
+        labels.flatMap((label) =>
+          label.brand.logo ? [label.brand.logo] : [],
+        ),
+      ),
+    ];
+    const logoAspectRatios = new Map(
+      await Promise.all(
+        logoSources.map(async (source) => [
+          source,
+          await loadImageAspectRatio(source),
+        ] as const),
+      ),
+    );
 
     const scale = Math.min(labelWidth, labelHeight) / 12;
 
@@ -84,12 +127,43 @@ export default function CreatedLabels() {
             "S",
           );
 
+          const labelPadding = 0.5; // matches CSS: padding: 0.5mm on .labelContainer
+          const textX = x + 1;
+          const aspect = label.brand.logo
+            ? (logoAspectRatios.get(label.brand.logo) ?? 1)
+            : 1;
+          const logoBox = label.brand.logo
+            ? getLogoDimensions(
+                getConstrainedLogoSize(
+                  labelWidth,
+                  labelHeight,
+                  labelLogoSize,
+                  brandFontSize,
+                  filamentFontSize,
+                  aspect,
+                ),
+                aspect,
+              )
+            : undefined;
+          const logoContainerX = logoBox
+            ? x + labelWidth - logoBox.width - labelPadding
+            : x + labelWidth - 1;
+          const textLogoGap = logoBox ? 0.5 : 0;
+          const textMaxWidth = Math.max(
+            0,
+            logoContainerX - textX - textLogoGap,
+          );
+
           // ---- Text ----
           doc.setFontSize(brandFontSize);
           doc.setFont("helvetica", "bold");
 
           const brandTextHeight = brandFontSize * 0.3528;
-          doc.text(label.brand.name, x + 1, y + 1 + brandTextHeight);
+          doc.text(
+            fitTextToWidth(doc, label.brand.name, textMaxWidth),
+            textX,
+            y + 1 + brandTextHeight,
+          );
 
           doc.setFontSize(filamentFontSize);
           doc.setFont("helvetica", "normal");
@@ -98,18 +172,19 @@ export default function CreatedLabels() {
           const bottomMargin = 1;
 
           doc.text(
-            label.type,
-            x + 1,
+            fitTextToWidth(doc, label.type, textMaxWidth),
+            textX,
             y + labelHeight - bottomMargin - filamentTextHeight - 0.5,
           );
 
-          doc.text(label.name, x + 1, y + labelHeight - bottomMargin);
+          doc.text(
+            fitTextToWidth(doc, label.name, textMaxWidth),
+            textX,
+            y + labelHeight - bottomMargin,
+          );
 
           // ---- Logo area (RIGHT COLUMN like CSS grid) ----
-          if (label.brand.logo) {
-            const labelPadding = 0.5; // matches CSS: padding: 0.5mm on .labelContainer
-
-            const logoContainerX = x + labelWidth - logoBoxSize - labelPadding;
+          if (label.brand.logo && logoBox) {
             const logoContainerY = y + labelPadding;
 
             const hasBackground =
@@ -119,44 +194,48 @@ export default function CreatedLabels() {
             const padding = brandFontSize > 0 ? 0.7 * scale : 0;
             const offset = 0.3 * scale;
 
-            const img = new Image();
-            img.src = label.brand.logo;
-            const aspect = img.width && img.height ? img.width / img.height : 1;
+            const innerWidth = Math.max(
+              0,
+              logoBox.width - offset - (hasBackground ? padding * 2 : 0),
+            );
+            const innerHeight = Math.max(
+              0,
+              logoBox.height - offset - (hasBackground ? padding * 2 : 0),
+            );
 
-            const innerSize = logoBoxSize - (hasBackground ? padding * 2 : 0);
+            if (innerWidth > 0 && innerHeight > 0) {
+              let drawW = innerWidth;
+              let drawH = drawW / aspect;
+              if (drawH > innerHeight) {
+                drawH = innerHeight;
+                drawW = drawH * aspect;
+              }
 
-            let drawW = innerSize;
-            let drawH = innerSize;
-            if (aspect > 1) {
-              drawH = innerSize / aspect;
-            } else {
-              drawW = innerSize * aspect;
+              // Same offset applied in both cases — CSS uses it unconditionally
+              const imgX =
+                logoContainerX +
+                logoBox.width -
+                offset -
+                drawW -
+                (hasBackground ? padding : 0);
+              const imgY =
+                logoContainerY + offset + (hasBackground ? padding : 0);
+
+              if (hasBackground) {
+                doc.setFillColor(label.brand.backgroundColor);
+                doc.roundedRect(
+                  imgX - padding,
+                  imgY - padding,
+                  drawW + padding * 2,
+                  drawH + padding * 2,
+                  padding,
+                  padding,
+                  "F",
+                );
+              }
+
+              doc.addImage(label.brand.logo, "PNG", imgX, imgY, drawW, drawH);
             }
-
-            // Same offset applied in both cases — CSS uses it unconditionally
-            const imgX =
-              logoContainerX +
-              logoBoxSize -
-              offset -
-              drawW -
-              (hasBackground ? padding : 0);
-            const imgY =
-              logoContainerY + offset + (hasBackground ? padding : 0);
-
-            if (hasBackground) {
-              doc.setFillColor(label.brand.backgroundColor);
-              doc.roundedRect(
-                imgX - padding,
-                imgY - padding,
-                drawW + padding * 2,
-                drawH + padding * 2,
-                padding,
-                padding,
-                "F",
-              );
-            }
-
-            doc.addImage(label.brand.logo, "PNG", imgX, imgY, drawW, drawH);
           }
 
           currentLabel++;

@@ -1,9 +1,14 @@
-import { forwardRef, type HTMLAttributes } from "react";
+import { forwardRef, useEffect, useState, type HTMLAttributes } from "react";
 import type { Brand } from "../../types";
 import styles from "./index.module.css";
 import { useContextSelector } from "use-context-selector";
 import { AppContext } from "../../AppContextWrapper";
 import classNames from "classnames";
+import {
+  getConstrainedLogoSize,
+  getLogoDimensions,
+  loadImageAspectRatio,
+} from "../../helper";
 
 type Props = HTMLAttributes<HTMLDivElement> & {
   brand: Brand | undefined;
@@ -19,6 +24,35 @@ const LogoDisplay = forwardRef<HTMLDivElement, Props>(
         labelConfig,
       }),
     );
+    const [logoAspectRatio, setLogoAspectRatio] = useState(1);
+
+    useEffect(() => {
+      let active = true;
+      const aspectRatio = brand?.logo
+        ? loadImageAspectRatio(brand.logo)
+        : Promise.resolve(1);
+
+      aspectRatio.then((value) => {
+        if (active) setLogoAspectRatio(value);
+      });
+
+      return () => {
+        active = false;
+      };
+    }, [brand?.logo]);
+
+    const constrainedLogoSize = getConstrainedLogoSize(
+      labelConfig.width,
+      labelConfig.height,
+      labelConfig.logoSize,
+      labelConfig.brandFontSize,
+      labelConfig.filamentFontSize,
+      logoAspectRatio,
+    );
+    const logoDimensions = getLogoDimensions(
+      constrainedLogoSize,
+      logoAspectRatio,
+    );
 
     return (
       <div
@@ -31,7 +65,8 @@ const LogoDisplay = forwardRef<HTMLDivElement, Props>(
             "--label-width": `${labelConfig.width}mm`,
             "--label-height": `${labelConfig.height}mm`,
             "--label-border-radius": `${labelConfig.cornerRadius}mm`,
-            "--label-logo-size": `${labelConfig.logoSize}mm`,
+            "--label-logo-width": `${logoDimensions.width}mm`,
+            "--label-logo-height": `${logoDimensions.height}mm`,
             "--logo-brand-font-size": `${labelConfig.brandFontSize}pt`,
             "--logo-filament-font-size": `${labelConfig.filamentFontSize}pt`,
             "--label-bg-color": brand?.backgroundColor ?? "white",

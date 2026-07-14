@@ -1,10 +1,14 @@
+import { useState } from "react";
 import CreatedLabels from "./pageparts/CreatedLabels";
 import ExportImport from "./pageparts/ExportImport";
 import GlobalLabelSettings from "./pageparts/GlobalLabelSettings";
 import LabelDesigner from "./pageparts/LabelDesigner";
 import Management from "./pageparts/Management";
+import type { Brand } from "./types";
 
 function App() {
+  const [selectedBrand, setSelectedBrand] = useState<Brand | undefined>();
+
   return (
     <div className="container py-4">
       <header className="text-center mb-4">
@@ -23,8 +27,11 @@ function App() {
 
       <ExportImport />
       <Management />
-      <GlobalLabelSettings />
-      <LabelDesigner />
+      <GlobalLabelSettings selectedBrand={selectedBrand} />
+      <LabelDesigner
+        brand={selectedBrand}
+        onBrandChange={setSelectedBrand}
+      />
       <CreatedLabels />
     </div>
   );

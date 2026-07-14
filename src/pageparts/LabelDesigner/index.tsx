@@ -7,7 +7,12 @@ import { showUserError } from "../../helper";
 import styles from "./index.module.css";
 import LogoDisplay from "../../components/LogoDisplay";
 
-export default function LabelDesigner() {
+type Props = {
+  brand: Brand | undefined;
+  onBrandChange: (brand: Brand | undefined) => void;
+};
+
+export default function LabelDesigner({ brand, onBrandChange }: Props) {
   const { setAppState, brands, filamentTypes, labelConfig } =
     useContextSelector(
       AppContext,
@@ -22,8 +27,6 @@ export default function LabelDesigner() {
   const [filamentName, setFilamentName] = useState<string | undefined>(
     undefined,
   );
-
-  const [brand, setBrand] = useState<Brand | undefined>(undefined);
 
   const [filamentType, setFilamentType] = useState<FilamentType | undefined>(
     undefined,
@@ -87,7 +90,12 @@ export default function LabelDesigner() {
             <label className="form-label">Brand</label>
             <select
               className="form-select"
+              value={brand?.name ?? ""}
               onChange={(e) => {
+                if (e.target.value === "") {
+                  onBrandChange(undefined);
+                  return;
+                }
                 const selectedBrand = brands.find(
                   (b) => b.name === e.target.value,
                 );
@@ -95,7 +103,7 @@ export default function LabelDesigner() {
                   selectedBrand !== undefined,
                   "Selected brand not found in brands list",
                 );
-                setBrand(selectedBrand);
+                onBrandChange(selectedBrand);
               }}
             >
               <option value="">Select brand...</option>
