@@ -22,6 +22,7 @@ This tool generates **uniform, print-accurate labels** that can be attached to f
 - Fully configurable label dimensions:
   - Width and height (mm)
   - Corner radius
+  - Border style (none, dashed, or solid)
   - Font sizes
   - Logo size
 

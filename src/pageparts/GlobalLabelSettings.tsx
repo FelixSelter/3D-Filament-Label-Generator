@@ -2,6 +2,7 @@ import { useContextSelector } from "use-context-selector";
 import { AppContext } from "../AppContextWrapper";
 import NumberInput from "../components/NumberInput";
 import { useCallback } from "react";
+import type { BorderStyle } from "../types";
 
 export default function GlobalLabelSettings() {
   const { setAppState, labelConfig } = useContextSelector(
@@ -68,6 +69,30 @@ export default function GlobalLabelSettings() {
                 updateLabelConfig("cornerRadius", value);
               }}
             />
+          </div>
+          <div className="col-md-3 mb-2">
+            <label className="form-label" htmlFor="labelBorderStyle">
+              Border Style
+            </label>
+            <select
+              id="labelBorderStyle"
+              className="form-select"
+              value={labelConfig.borderStyle}
+              onChange={(event) => {
+                const borderStyle = event.target.value as BorderStyle;
+                setAppState((prev) => ({
+                  ...prev,
+                  labelConfig: {
+                    ...prev.labelConfig,
+                    borderStyle,
+                  },
+                }));
+              }}
+            >
+              <option value="none">None</option>
+              <option value="dashed">Dashed</option>
+              <option value="solid">Solid</option>
+            </select>
           </div>
           <div className="col-md-3 mb-2">
             <label className="form-label">Logo Size (mm)</label>

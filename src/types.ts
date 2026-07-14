@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const BorderStyleSchema = z.enum(["none", "dashed", "solid"]);
+export type BorderStyle = z.infer<typeof BorderStyleSchema>;
+
 export const BrandSchema = z.object({
   name: z.string(),
   logo: z.string().or(z.null()),
@@ -21,6 +24,7 @@ export const AppStateSchema = z.object({
     width: z.number(),
     height: z.number(),
     cornerRadius: z.number(),
+    borderStyle: BorderStyleSchema,
     logoSize: z.number(),
     brandFontSize: z.number(),
     filamentFontSize: z.number(),

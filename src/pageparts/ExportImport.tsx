@@ -3,7 +3,7 @@ import { AppContext, defaultContext } from "../AppContextWrapper";
 import { z } from "zod";
 import { showUserError } from "../helper";
 import { useCallback, useRef, useState } from "react";
-import type { AppStateType } from "../types";
+import { BorderStyleSchema, type AppStateType } from "../types";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const SafeSchemaV1 = z.object({
@@ -55,6 +55,7 @@ const SafeSchemaV2 = z.object({
       width: z.number(),
       height: z.number(),
       cornerRadius: z.number(),
+      borderStyle: BorderStyleSchema.optional(),
       logoSize: z.number(),
       brandFontSize: z.number(),
       filamentFontSize: z.number(),
@@ -68,9 +69,12 @@ function migrateV2ToCurrent(v2Data: V2Data): AppStateType {
   return {
     brands: [],
     labels: [],
-    labelConfig: defaultContext.labelConfig,
     filamentTypes: [],
     ...v2Data,
+    labelConfig: {
+      ...defaultContext.labelConfig,
+      ...v2Data.labelConfig,
+    },
   };
 }
 

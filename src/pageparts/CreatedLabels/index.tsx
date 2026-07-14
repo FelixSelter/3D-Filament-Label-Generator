@@ -14,6 +14,7 @@ export default function CreatedLabels() {
       width: labelWidth,
       height: labelHeight,
       cornerRadius: labelCornerRadius,
+      borderStyle: labelBorderStyle,
       logoSize: labelLogoSize,
       brandFontSize,
       filamentFontSize,
@@ -72,17 +73,23 @@ export default function CreatedLabels() {
           }
 
           // ---- Border ----
-          doc.setDrawColor(0);
-          doc.setLineWidth(borderWidth);
-          doc.roundedRect(
-            x - borderWidth / 2,
-            y - borderWidth / 2,
-            labelWidth + borderWidth,
-            labelHeight + borderWidth,
-            labelCornerRadius,
-            labelCornerRadius,
-            "S",
-          );
+          if (labelBorderStyle !== "none") {
+            doc.setDrawColor(0);
+            doc.setLineWidth(borderWidth);
+            doc.setLineDashPattern(
+              labelBorderStyle === "dashed" ? [1, 1] : [],
+              0,
+            );
+            doc.roundedRect(
+              x - borderWidth / 2,
+              y - borderWidth / 2,
+              labelWidth + borderWidth,
+              labelHeight + borderWidth,
+              labelCornerRadius,
+              labelCornerRadius,
+              "S",
+            );
+          }
 
           // ---- Text ----
           doc.setFontSize(brandFontSize);
@@ -168,6 +175,7 @@ export default function CreatedLabels() {
   }, [
     brandFontSize,
     filamentFontSize,
+    labelBorderStyle,
     labelCornerRadius,
     labelHeight,
     labelLogoSize,

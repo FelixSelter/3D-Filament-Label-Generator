@@ -1,5 +1,5 @@
 .labelContainer {
-  border: 0.5mm dashed black;
+  border: 0.5mm var(--label-border-style, dashed) black;
   border-radius: var(--label-border-radius, 2mm);
   width: var(--label-width, 22mm);
   height: var(--label-height, 12mm);

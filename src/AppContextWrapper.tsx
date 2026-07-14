@@ -75,6 +75,7 @@ export const defaultContext: AppStateType = {
     width: 22,
     height: 12,
     cornerRadius: 2,
+    borderStyle: "dashed",
     logoSize: 6,
     brandFontSize: 6,
     filamentFontSize: 5,
@@ -114,7 +115,10 @@ function loadLocalStorageV1(): AppStateType | null {
 
     const parsed = AppStateSchema.safeParse({
       ...migrated,
-      labelConfig: JSON.parse(savedSettings),
+      labelConfig: {
+        ...migrated.labelConfig,
+        ...JSON.parse(savedSettings),
+      },
     });
     return parsed.success ? parsed.data : migrated;
   } catch (e) {

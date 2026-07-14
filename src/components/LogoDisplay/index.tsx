@@ -31,6 +31,7 @@ const LogoDisplay = forwardRef<HTMLDivElement, Props>(
             "--label-width": `${labelConfig.width}mm`,
             "--label-height": `${labelConfig.height}mm`,
             "--label-border-radius": `${labelConfig.cornerRadius}mm`,
+            "--label-border-style": labelConfig.borderStyle,
             "--label-logo-size": `${labelConfig.logoSize}mm`,
             "--logo-brand-font-size": `${labelConfig.brandFontSize}pt`,
             "--logo-filament-font-size": `${labelConfig.filamentFontSize}pt`,
